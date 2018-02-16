@@ -1,0 +1,212 @@
+doctype html
+html(lang='en')
+  head
+    title Faculty Dashboard
+    link(rel="stylesheet", href=APP_URL + "LatoLatin/latolatinfonts.css")
+    link(rel="stylesheet", href=APP_URL + "style.css")
+
+  body
+    block body
+      if isDevMode
+        p
+          A(HREF="./../../dev/home") Home
+          | &nbsp; | &nbsp;
+          A(HREF="./../../dev/facultyList") Faculty List
+
+      H1= 'Faculty Dashboard: ' + sections[0].user.name
+      //-H1= sections[0].user.name
+        //- A(HREF=sections[0].html_url target="_blank")= sections[0].user.name
+
+      //-
+        each term in cstTerms
+          P= term.name
+          each module in term.modules
+            P= module.name
+          each student in term.students
+            P= student.name
+
+      //-for section in sections
+      each section in cstTerms
+        //-H2 #{section.course.name}, Section #{section.section_name}
+        //-
+          P
+            B Term:&nbsp;
+            | #{section.course.term.name} &nbsp;
+            B Start date:&nbsp;
+            | #{new Date(Date.parse(section.course.start_at)).toLocaleDateString()}
+
+        if (section.students.length > 0)
+          H2= section.name
+          DIV(class="scrolling")
+            TABLE(class="students_table")
+              TR
+                TH(CLASS='stuck_left')
+                  DIV Teacher
+                  DIV Candidates
+                TH
+                  DIV Clinical Experience
+                  DIV Hours
+                each module in section.modules
+                  TH
+                    DIV= module.name.split(':')[0]
+                    DIV(STYLE='font-weight:normal')= '(' + module.items.length + ' submissions)'
+                TH(COLSPAN=section.maxISupervisionAssignmentsPerStudent + 2) Observation Assignments
+
+              for student in section.students
+                TR
+                  TD(CLASS='stuck_left')
+                    DIV(CLASS='vertical_text_align')
+                      A(HREF= 'https://calstateteach.instructure.com/courses/'+ section.course.id + '/grades/' + student.id + '#tab-assignments' TARGET="_BLANK")= student.name
+                  
+                  TD(STYLE='text-align:center') #{student.ce_hours_entered} entered</BR>#{student.ce_hours_pending} pending, #{student.ce_hours_approved} approved
+                  each module in section.modules
+
+                    //- Calculate how many items were submitted & graded
+                    //- There may be no items in a module at all.
+                    - var totalItems = module.items.length
+                    - var unsubmittedItems = 0
+                    - var gradedItems = 0
+                    - for (item of module.items)
+                      if student.submissions[item.content_id]
+                        - var moduleStatus = student.submissions[item.content_id].workflow_state
+                        - if (moduleStatus === 'unsubmitted') ++unsubmittedItems
+                        - if (moduleStatus === 'graded') ++gradedItems
+
+                    - var submittedItems = totalItems - unsubmittedItems
+
+                    //- Build text of submission detail link
+                    - var linkText = gradedItems + '/' + submittedItems + ' reviewed'
+                    //- var linkText = submittedItems + ' out of ' + totalItems + ' submitted'
+                    //- var linkText = Math.round((submittedItems / totalItems) * 100) + '% submitted'
+
+                    //- Build URL to submission detail page
+                    - var linkUrl = `./${section.user_id}/section/${section.id}/module/${module.id}/student/${student.id}`
+
+                    TD
+                      A(HREF=linkUrl)= linkText
+
+                  - var iSupeSection = student.iSupervisionSections[0]
+                  if iSupeSection
+                    for iSupeAssignment in iSupeSection.assignmentOverrides
+                      TD
+                        //- 01.02.2017 tps Old assignments go to assignment URL,
+                        //- new assignments go to speed grader.
+                        - var iSupeAssignmentUrl = iSupeAssignment.html_url
+                        - if (iSupeAssignment.id >= 1060)
+                          - iSupeAssignmentUrl = `https://calstateteach.instructure.com/courses/${iSupeAssignment.course_id}/gradebook/speed_grader?assignment_id=${iSupeAssignment.id}#%7B%22student_id%22%3A%22${student.id}%22%7D` 
+                        A(HREF=iSupeAssignmentUrl TARGET="_BLANK")= iSupeAssignment.name
+                        BR/
+                        SPAN= (iSupeAssignment.canvasStatus === 'graded') ? 'reviewed' : iSupeAssignment.canvasStatus
+                        //- var critItStatusString = 'CritiqueIt entry not created'
+                        //- if (iSupeAssignment.critiqueItStatus) critItStatusString = 'Status: ' + iSupeAssignment.critiqueItStatus
+                        //  SPAN= critItStatusString
+
+                    //- Pad rest of row for sections with fewer than the max number of assignments
+                    - var emptyCellCount = section.maxISupervisionAssignmentsPerStudent - iSupeSection.assignmentOverrides.length
+                    - for (var n = 0; n < emptyCellCount; ++n)
+                      TD
+                    TD
+                      BUTTON(onclick=`postAssignment(${iSupeSection.course_id}, ${iSupeSection.course_section_id}, "${student.defaultNewAssignmentName}")` disabled=DISABLE_ADD) Add assignment
+
+                  else
+                    if (section.maxISupervisionAssignmentsPerStudent > 0)
+                      TD(COLSPAN=section.maxISupervisionAssignmentsPerStudent)
+                    TD iSupervision section not found
+
+        //-else
+          //-P No students in this section.
+
+      P
+        //- BUTTON(onclick="postRefresh()") Refresh data
+        small #{ (new Date()).toString() }
+
+      if isDevMode
+        HR
+        button(onclick="toggleJson()") Toggle JSON
+        #jsonData
+          //-PRE= JSON.stringify(facultyUser, null, 2)
+          PRE= JSON.stringify(cstTerms, null, 2)
+
+
+      // Modal add assignment form
+      DIV(id="addAssForm", class="modal")
+        FORM(class="modal-content animate" method="POST" action="./../addISupeAssignment")
+          SPAN(onclick="document.getElementById('addAssForm').style.display='none'"
+            class="close"
+            title="Close Modal") &times;
+          DIV(class="container")
+            LABEL Add assignment with name:
+            INPUT(type='text'
+              name='assignmentName'
+              id='assignmentName'
+              required)
+            INPUT(type='hidden' id='courseId' name='courseId' value='')
+            INPUT(type='hidden' id='sectionId' name='sectionId' value='')
+            INPUT(type='hidden' id='redirectUrl' name='redirectUrl' value='')
+            BUTTON(type='submit' onclick="submitAdd()") Submit
+            | &nbsp; &nbsp;
+            BUTTON(type='button'
+              onclick="document.getElementById('addAssForm').style.display='none'"
+              class="cancelbtn") Cancel
+            | &nbsp; &nbsp;
+            SPAN(id="waitMsg" class="errMsg" style="visibility:hidden") Adding new assignment...
+
+      //- Simple scripting to show/hide JSON data during development
+      script.
+        document.getElementById('jsonData').style.display = 'none';
+
+        function toggleJson() {
+          var x = document.getElementById('jsonData');
+          if (x.style.display === 'none') {
+            x.style.display = 'block';
+          } else {
+            x.style.display = 'none';
+          }
+        }
+
+        // Get the modal
+        var modal = document.getElementById('addAssForm');
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+          if (event.target == modal) {
+            modal.style.display = "none";
+          }
+        }
+
+        function postAssignment(courseId, sectionId, nameString) {
+          document.getElementById('courseId').value = courseId;
+          document.getElementById('sectionId').value = sectionId;
+          document.getElementById('redirectUrl').value = document.URL;
+          document.getElementById('assignmentName').value = nameString;
+
+          // Display modal form
+          document.getElementById('addAssForm').style.display = 'block';
+          document.getElementById('assignmentName').focus();
+        }
+
+        function submitAdd() {
+          // User submits assignment add.
+          document.getElementById('waitMsg').style.visibility = "visible";
+          document.getElementById('addAssForm').submit();
+        }
+
+
+        function postRefresh() {
+          //- alert("Request data refresh");
+
+          var postForm = document.createElement("FORM");
+          postForm.action = "./../dataRefresh";
+          postForm.method = "POST";
+          document.body.appendChild(postForm);
+
+          var redirectUrlField = document.createElement("INPUT");
+          redirectUrlField.setAttribute("type", "hidden");
+          redirectUrlField.setAttribute("name", "redirectUrl");
+          redirectUrlField.setAttribute("value", document.URL);
+          postForm.appendChild(redirectUrlField);
+
+          postForm.submit();
+        }
+
+//- 12.27.2017 tps Stole modal form from https://www.w3schools.com/howto/howto_css_login_form.asp

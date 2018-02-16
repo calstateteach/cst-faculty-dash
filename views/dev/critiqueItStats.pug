@@ -1,0 +1,12 @@
+doctype html
+html(lang='en')
+ head
+   title CritiqueIt Stats
+   link(rel="stylesheet", href="./../LatoLatin/latolatinfonts.css")
+   link(rel="stylesheet", href="./../style.css")
+ body
+  P
+    A(HREF="./home") Home
+  h1 CritiqueIt API Stats
+  PRE= JSON.stringify(stats, null, 2)
+  SMALL=(new Date()).toString()

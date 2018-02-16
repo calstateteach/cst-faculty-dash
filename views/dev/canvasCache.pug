@@ -1,0 +1,57 @@
+doctype html
+html(lang='en')
+ head
+   title CST Dashboard Canvas Cache
+   link(rel="stylesheet", href=APP_URL + "LatoLatin/latolatinfonts.css")
+   link(rel="stylesheet", href=APP_URL + "style.css")
+   STYLE.
+    table, th, td { border: 1px solid black; border-collapse: collapse }
+    th, td { 
+      padding: 3px;
+      font-size: smaller;
+    }
+
+body
+  p
+    A(HREF="./home") Home
+  H1 CST Dashboard Canvas Cache
+  P This page shows what Canvas data has been cached on disk. You can refresh the data by <A HREF='primeCanvasCache'>priming the cache</A>.
+  P
+    BUTTON(type="button" onclick="window.location.reload('true');") Reload page
+  if files.length > 0
+    TABLE
+      TR
+        TH
+          A(HREF='canvasCache') Key
+        TH
+          A(HREF='canvasCache?sort=size') Size on disk
+        TH
+          A(HREF='canvasCache?sort=timestamp') Timestamp
+        TH
+          A(HREF='canvasCache?sort=age') Minutes old
+        TH In memory
+        TH
+
+      - var now = new Date()
+      each file in files
+        TR
+          -var cacheKey = file.fileName.substr(0, file.fileName.lastIndexOf('.'))
+          TD= cacheKey
+          TD(STYLE="text-align:right")= file.size.toLocaleString()
+          TD= file.timestamp
+          TD(STYLE="text-align:right")= Math.round((now - file.timestamp) / 1000 / 60)
+          TD(STYLE="text-align:center")= canvasCache[cacheKey] ? 'X' : ''
+          TD
+            FORM(method="POST" action="canvasCache")
+              INPUT(TYPE='hidden' NAME='action' VALUE='clearKey')
+              INPUT(TYPE='hidden' NAME='cacheKey' VALUE=cacheKey)
+              BUTTON(type='submit') Clear
+  else
+    P The disk cache is empty.  
+  P= 'Objects cached on disk: ' + files.length
+  P= 'File size total: ' + fileSizeTotal.toLocaleString() + ' B'
+  P= 'Objects cached in memory: ' + Object.keys(canvasCache).length
+  P
+    BUTTON(type="button" onclick="window.location.reload('true');") Reload page
+
+  P(STYLE="font-size: smaller")= now

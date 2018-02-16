@@ -1,0 +1,62 @@
+doctype html
+html(lang='en')
+ head
+   title Simulate LTI Request
+   link(rel="stylesheet", href="../LatoLatin/latolatinfonts.css")
+   link(rel="stylesheet", href="../style.css")
+ body
+  p
+    a(href="./home") Home
+  h1 Simulate LTI POST Request
+  table
+    tr
+      td
+        form(id="postForm" action="./../lti", method="post")
+          p
+            input(type="submit", value="Post LTI request")
+          P
+            button(type="button" onclick="refreshSignature()") Regenerate OAuth signature
+
+          table(cellpadding="0", cellspacing="0", border="0")
+            each val, key in postFields
+              tr
+                td
+                  label= key + ":"
+                td
+                  input(type="text", name=key, value=val, size="80")
+      td(STYLE="width:40px")
+      td(STYLE="vertical-align:top")
+        H2 Faculty Users
+        select(id="facultySelection" name="users" size=10 onclick="document.getElementsByName('custom_canvas_user_id')[0].value = this.value")
+          for user in facultyUsers
+            option(value=user.id)= user.name + ' (' + user.id + ')'
+
+        P
+          button(type="button" onclick="postAsUser()") Post LTI request as selected user
+
+  SCRIPT.
+    //- Simple script to refresh OAuth signature
+    function refreshSignature() {
+      var postForm = document.getElementById("postForm");
+      postForm.action = "ltiForm";
+      postForm.method = "POST";
+      postForm.submit();
+    }
+
+    //- User wants to regenerate signature & then launch LTI.
+    function postAsUser() {
+      var selectedUserId =  document.getElementById("facultySelection").value;
+      if (selectedUserId) {
+        document.getElementsByName('custom_canvas_user_id')[0].value = selectedUserId;
+        var postForm = document.getElementById("postForm");
+        postForm.action = "ltiForm?postOnLoad=1"
+        postForm.submit();
+      }
+    }
+
+  //- Submit the form right away if user requested to make LTI request.
+  if postOnLoad
+    SCRIPT.
+      document.addEventListener("DOMContentLoaded", function(event) {
+      document.getElementById("postForm").submit();
+      });

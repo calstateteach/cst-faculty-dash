@@ -1,0 +1,55 @@
+[
+{
+    "_comment": [ "01.04.2018 tps",
+        "01.08.2018 tps Updated codes.",
+        "Each array element describes a CST term and its modules.",
+        "course_id is a course's Canvas ID.",
+        "code is the course code used in CAM Google spreadsheet.",
+        "module_indices are 0-based indexes of modules in the term.",
+        "Place students who are not in the CAM spreadsheet in default module."
+    ],
+    "name": "Term 1",
+    "course_id": 52,
+    "code": "431",
+    "module_indices": [0, 1, 2, 3, 4, 5],
+    "default": true
+},
+{
+    "name": "Term 1A",
+    "course_id": 52,
+    "code": "431A",
+    "module_indices": [0, 1, 2]
+},
+{
+    "name": "Term 1B",
+    "course_id": 52,
+    "code": "431B",
+    "module_indices": [3, 4, 5]
+},
+{
+    "name": "Term 2",
+    "course_id": 86,
+    "code": "432",
+    "module_indices": [0, 1, 2, 3],
+    "default": true
+},
+{
+    "name": "Term 2A",
+    "course_id": 86,
+    "code": "432A",
+    "module_indices": [0, 1]
+},
+{
+    "name": "Term 2B",
+    "course_id": 86,
+    "code": "432B",
+    "module_indices": [2, 3]
+},
+{
+    "name": "Term 3",
+    "course_id": null,
+    "code": "433",
+    "module_indices": [0, 1, 2, 3],
+    "default": true
+}
+]

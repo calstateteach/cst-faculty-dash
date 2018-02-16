@@ -1,0 +1,28 @@
+doctype html
+html(lang='en')
+  head
+    title Test CE Hours DB Connection
+    link(rel="stylesheet", href="./../LatoLatin/latolatinfonts.css")
+    link(rel="stylesheet", href="./../style.css")
+    STYLE.
+      table, th, td { border: 1px solid black; }
+      th, td { padding: 3px; }
+      .rt { text-align: right; }
+  body
+  P
+    A(HREF="./home") Home
+  h1 Test CE Hours DB Connection
+  TABLE(STYLE= )
+    TR
+      TH Candiate Email
+      TH Approval State
+      TH Total Minutes
+      TH Total Hours
+    for doc in data
+      TR
+        TD= doc._id.candidateEmail
+        TD= doc._id.approvalState
+        TD.rt= doc.totalMinutes
+        TD.rt= doc.totalHours
+  P
+    SMALL=(new Date()).toString()

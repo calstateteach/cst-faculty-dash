@@ -1,0 +1,54 @@
+doctype html
+html(lang='en')
+ head
+   title CST Dashboard Courses Configuration
+   link(rel="stylesheet", href=APP_URL + "LatoLatin/latolatinfonts.css")
+   link(rel="stylesheet", href=APP_URL + "style.css")
+   STYLE.
+    table, th, td { border: 1px solid black; border-collapse: collapse }
+    th, td { padding: 3px; }
+    /* Clear floats after the columns */
+    .contentRow:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+    .contentCol {
+      float: left;
+      width: 50%;
+      overflow-wrap: break-word;
+    }
+
+body
+  p
+    A(HREF="./home") Home
+  H1 CST Dashboard Terms Configuration
+  DIV(CLASS="contentRow")
+    DIV(CLASS="contentCol")
+      H2 CAM Data
+      P Source: 
+        A(HREF=camUrl)= camUrl
+      TABLE
+        TR
+          TH First name
+          TH Last name
+          TH Email
+          TH Course
+        each row in camRows
+          TR
+            TD= row.first_name
+            TD= row.last_name
+            TD= row.email
+            TD= row.course
+      P= 'Count: ' + camRows.length
+      FORM(ACTION='termsConfig' METHOD='POST')
+        INPUT(TYPE='submit' value='Reload CAM data')
+        INPUT(TYPE='hidden' name='reload_cam_data' value='true')
+
+    DIV(CLASS="contentCol")
+      H2 Term Module Map
+      if moduleMapErr
+        P.errMsg= moduleMapErr
+      else
+        PRE(STYLE="border:1px solid black")= JSON.stringify(moduleMap, null, 2)
+  

@@ -1,0 +1,82 @@
+doctype html
+html(lang='en')
+  head
+    title Faculty Dashboard
+    link(rel="stylesheet", href=APP_URL + "LatoLatin/latolatinfonts.css")
+    link(rel="stylesheet", href=APP_URL + "style.css")
+  body
+    if isDevMode
+      p
+        A(HREF="./../../../../../../../../dev/home") Home
+        | &nbsp; | &nbsp;
+        A(HREF="./../../../../../../../../dev/facultyList") Faculty List
+
+    H1
+      A(HREF=APP_URL + 'dash/faculty/' + sections[0].user_id)= 'Faculty Dashboard: ' + sections[0].user.name
+      //- A(HREF='./../../../../../../../faculty/' + sections[0].user_id)= sections[0].user.name
+      //- A(HREF=sections[0].html_url target="_blank")= sections[0].user.name
+
+    //- We only care about one section
+    - var section = sections.find( e => { return e.id === sectionId;})
+
+    //-H2 #{section.course.name}, Section #{section.section_name}
+    //-
+      P
+        B Term:&nbsp;
+        | #{section.course.term.name} &nbsp;
+        B Start date:&nbsp;
+        | #{new Date(Date.parse(section.course.start_at)).toLocaleDateString()}
+
+    //- We only care about one module
+    - var module = section.modules.find( e => { return e.id === moduleId; })
+
+    //- We only care about one student
+    - var student = section.students.find( e => { return e.id === studentId; })
+
+    //- What's the student's term?
+    - var term = cstTerms.find( e => { return e.code === student.cstTerm;})
+
+    H2= term.name
+    H3= module.name
+
+    DIV(class="scrolling")
+      TABLE(class="students_table")
+        TR
+          TH(CLASS='stuck_left') Student
+          for item in module.items
+            TH
+              A(HREF=item.html_url TARGET="_blank")= item.title
+        TR
+          TD(CLASS='stuck_left')
+            DIV(CLASS='vertical_text_align')
+              A(HREF= 'https://calstateteach.instructure.com/courses/'+ section.course.id + '/grades/' + student.id + '#tab-assignments' TARGET="_BLANK")= student.name
+          for item in module.items
+            TD
+              - var workflow_state = student.submissions[item.content_id].workflow_state;
+              - workflow_state = (workflow_state === 'graded') ? 'reviewed' : workflow_state
+              A(HREF=`https://calstateteach.instructure.com/courses/${section.course.id}/gradebook/speed_grader?assignment_id=${item.content_id}#%7B%22student_id%22%3A%22${student.id}%22%7D` TARGET="_BLANK")= workflow_state
+
+    H3
+      A(HREF='./../../../../../../../faculty/' + sections[0].user_id) Back to overview
+    P
+      small #{ (new Date()).toString() }
+
+    if isDevMode
+      HR
+      button(onclick="toggleJson()") Toggle JSON
+      #jsonData
+        PRE= JSON.stringify(sections, null, 2)
+
+
+    //- Simple scripting to show/hide JSON data during development
+    script.
+      document.getElementById('jsonData').style.display = 'none';
+
+      function toggleJson() {
+        var x = document.getElementById('jsonData');
+        if (x.style.display === 'none') {
+          x.style.display = 'block';
+        } else {
+          x.style.display = 'none';
+        }
+      }

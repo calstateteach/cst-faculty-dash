@@ -1,0 +1,6 @@
+# 01.12.2018 tps We don't care about cached Canvas data
+canvas_cache/*.json
+
+# 02.01.2018 tps We don't care about the npm error log
+npm-debug.log
+

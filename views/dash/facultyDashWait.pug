@@ -1,0 +1,20 @@
+doctype html
+html(lang='en')
+  head
+    title Faculty Dashboard
+    link(rel="stylesheet", href="./../../LatoLatin/latolatinfonts.css")
+    link(rel="stylesheet", href="./../../style.css")
+
+    - var content = '0; URL="./../faculty/' + userId + '"'
+    meta(http-equiv="refresh" content=content)
+
+  body(STYLE='background-image:url("./../../spinner.gif"); background-position: center top')
+    block body
+      if isDevMode
+        p
+          A(HREF="./../../dev/home") Home
+          | &nbsp; | &nbsp;
+          A(HREF="./../../dev/facultyList") Faculty List
+
+      H1 Faculty Dashboard
+      P(STYLE="text-align:center") Retrieving Canvas data. Please Wait.

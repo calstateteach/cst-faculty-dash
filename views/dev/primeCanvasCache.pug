@@ -1,0 +1,15 @@
+doctype html
+html(lang='en')
+ head
+   title CST Dashboard Canvas Cache
+   link(rel="stylesheet", href=APP_URL + "LatoLatin/latolatinfonts.css")
+   link(rel="stylesheet", href=APP_URL + "style.css")
+body
+  p
+    A(HREF="./home") Home
+  H1 Prime the Canvas Cache
+  P Clicking this button will cause the Web app to begin filling its Canvas data cache from new Canvas API queries. Refresh the <A HREF='canvasCache'>Canvas Cache page</A> to monitor progress of the cache refilling.
+  FORM(method="POST" action="primeCanvasCache")
+    BUTTON(type='submit') Prime Canvas cache
+
+  P(STYLE="font-size: smaller")= now

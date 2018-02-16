@@ -1,0 +1,42 @@
+doctype html
+html(lang='en')
+  head
+    title CST Dashboard Faculty List
+    link(rel="stylesheet", href="./../LatoLatin/latolatinfonts.css")
+    link(rel="stylesheet", href="./../style.css")
+    STYLE table, th, td { border: 1px solid black; }
+  body
+    p
+      A(HREF="./home") Home
+    H1 CST Dashboard Faculty List
+    H2 Teachers
+    ul
+      each teacher in teachers
+        li
+          //-A(HREF="./../dash/facultyPleaseWait/" + teacher.id)= teacher.name
+          A(HREF="./../dash/pleaseWait/?redirectUrl=" + APP_URL + "dash/faculty/" + teacher.id)= teacher.name
+    H2 TAs
+    ul
+      each ta in tas
+        li
+          A(HREF="./../dash/pleaseWait/?redirectUrl=" + APP_URL + "dash/faculty/" + ta.id)= ta.name
+    P
+      BUTTON(onclick="postRefresh()") Refresh data
+
+    SCRIPT.
+      //- Simple script to POST request for cache refresh.
+      function postRefresh() {
+
+        var postForm = document.createElement("FORM");
+        postForm.action = "clearCanvasData";
+        postForm.method = "POST";
+        document.body.appendChild(postForm);
+
+        var redirectUrlField = document.createElement("INPUT");
+        redirectUrlField.setAttribute("type", "hidden");
+        redirectUrlField.setAttribute("name", "redirectUrl");
+        redirectUrlField.setAttribute("value", document.URL);
+        postForm.appendChild(redirectUrlField);
+
+        postForm.submit();
+      }
